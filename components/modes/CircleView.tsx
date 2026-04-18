@@ -91,20 +91,35 @@ function StoryRing({ story }: { story: Story }) {
 }
 
 /* ── Main ── */
-export function CircleView() {
+export function CircleView({ searchQuery = "" }: { searchQuery?: string }) {
   const [friends, setFriends] = useState<Friend[]>(FRIENDS);
   const [posts, setPosts] = useState<FeedPost[]>(FEED_POSTS);
   const [activeTab, setActiveTab] = useState<"posts" | "friends">("posts");
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
   function toggleConnect(id: number) {
     setFriends((prev) => prev.map((f) => f.id === id ? { ...f, connected: !f.connected } : f));
   }
 
   function toggleLike(id: number) {
-    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, liked: !p.liked } : p));
+    setPosts((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        const liked = !p.liked;
+        return { ...p, liked, likes: Math.max(0, p.likes + (liked ? 1 : -1)) };
+      })
+    );
   }
 
   const connectedCount = friends.filter((f) => f.connected).length;
+  const visiblePosts = normalizedQuery
+    ? posts.filter((post) => `${post.user} ${post.text}`.toLowerCase().includes(normalizedQuery))
+    : posts;
+  const visibleFriends = normalizedQuery
+    ? friends.filter((friend) =>
+        `${friend.name} ${friend.handle}`.toLowerCase().includes(normalizedQuery)
+      )
+    : friends;
 
   return (
     <div className="flex h-full flex-col overflow-y-auto rounded-3xl border border-white/10 bg-white/5 shadow-xl backdrop-blur-xl">
@@ -180,7 +195,7 @@ export function CircleView() {
       <div className="flex-1 p-4">
         {activeTab === "posts" && (
           <div className="flex flex-col gap-3">
-            {posts.map((post) => (
+            {visiblePosts.map((post) => (
               <article key={post.id} className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -203,7 +218,7 @@ export function CircleView() {
                     className={`flex items-center gap-1.5 text-xs transition ${post.liked ? "text-rose-400" : "text-zinc-500 hover:text-rose-400"}`}
                   >
                     <Heart size={14} fill={post.liked ? "currentColor" : "none"} />
-                    {post.likes + (post.liked ? 1 : 0)}
+                    {post.likes}
                   </button>
                   <button className="flex items-center gap-1.5 text-xs text-zinc-500 transition hover:text-sky-400">
                     <MessageCircle size={14} />
@@ -212,18 +227,24 @@ export function CircleView() {
                 </div>
               </article>
             ))}
+            {visiblePosts.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-white/15 bg-zinc-900/30 p-5 text-center text-sm text-zinc-400">
+                No posts found for “{searchQuery.trim()}”.
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === "friends" && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {friends.map((friend) => (
+            {visibleFriends.map((friend) => (
               <div key={friend.id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900/60 p-3">
                 <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white ${friend.gradient}`}>
                   {friend.name.split(" ").map((w) => w[0]).join("")}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-white">{friend.name}</p>
+                  <p className="truncate text-[11px] text-zinc-500">{friend.handle}</p>
                   <p className="text-xs text-zinc-500">{friend.mutualFriends} mutual friends</p>
                 </div>
                 <button
@@ -238,6 +259,11 @@ export function CircleView() {
                 </button>
               </div>
             ))}
+            {visibleFriends.length === 0 && (
+              <div className="sm:col-span-2 rounded-2xl border border-dashed border-white/15 bg-zinc-900/30 p-5 text-center text-sm text-zinc-400">
+                No friends found for “{searchQuery.trim()}”.
+              </div>
+            )}
           </div>
         )}
       </div>

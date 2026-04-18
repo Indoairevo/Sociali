@@ -47,18 +47,19 @@ const modeBadgeColors: Record<ModeKey, string> = {
 export default function Home() {
   const [mode, setMode] = useState<ModeKey>("connect");
   const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [notifCount] = useState(3);
 
   const currentView = useMemo(() => {
     switch (mode) {
-      case "connect": return <ConnectView />;
-      case "pulse":   return <PulseView />;
-      case "vibe":    return <VibeView />;
-      case "watch":   return <WatchView />;
-      case "circle":  return <CircleView />;
+      case "connect": return <ConnectView searchQuery={searchQuery} />;
+      case "pulse":   return <PulseView searchQuery={searchQuery} />;
+      case "vibe":    return <VibeView searchQuery={searchQuery} />;
+      case "watch":   return <WatchView searchQuery={searchQuery} />;
+      case "circle":  return <CircleView searchQuery={searchQuery} />;
       default:        return null;
     }
-  }, [mode]);
+  }, [mode, searchQuery]);
 
   const activeTab = tabs.find((t) => t.key === mode)!;
 
@@ -121,6 +122,8 @@ export default function Home() {
                 autoFocus
                 className="flex-1 bg-transparent text-sm text-white placeholder:text-zinc-500 focus:outline-none"
                 placeholder={`Search in ${activeTab.label}…`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </motion.div>

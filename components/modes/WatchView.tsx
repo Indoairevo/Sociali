@@ -115,7 +115,7 @@ function ThumbnailCard({ video, onPlay }: { video: Video; onPlay: (v: Video) => 
   );
 }
 
-function VideoPlayer({ video, onClose }: { video: Video; onClose: () => void }) {
+function VideoPlayer({ video, onClose, onSelectRelated }: { video: Video; onClose: () => void; onSelectRelated: (video: Video) => void }) {
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -206,7 +206,7 @@ function VideoPlayer({ video, onClose }: { video: Video; onClose: () => void }) 
             <div
               key={v.id}
               className="flex cursor-pointer gap-2 rounded-xl p-1.5 transition hover:bg-white/8"
-              onClick={onClose}
+              onClick={() => onSelectRelated(v)}
             >
               <div className={`relative h-16 w-28 shrink-0 rounded-lg bg-gradient-to-br ${v.thumbnailGradient}`}>
                 <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1 py-0.5 text-[9px] font-medium text-white">
@@ -226,18 +226,30 @@ function VideoPlayer({ video, onClose }: { video: Video; onClose: () => void }) 
   );
 }
 
-export function WatchView() {
+export function WatchView({ searchQuery = "" }: { searchQuery?: string }) {
   const [playing, setPlaying] = useState<Video | null>(null);
 
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const visibleVideos = normalizedQuery
+    ? VIDEOS.filter((video) =>
+        `${video.title} ${video.channel} ${video.description}`.toLowerCase().includes(normalizedQuery)
+      )
+    : VIDEOS;
+
   if (playing) {
-    return <VideoPlayer video={playing} onClose={() => setPlaying(null)} />;
+    return <VideoPlayer video={playing} onClose={() => setPlaying(null)} onSelectRelated={setPlaying} />;
   }
 
   return (
     <section className="grid h-full grid-cols-1 gap-4 overflow-y-auto rounded-3xl border border-white/10 bg-white/5 p-4 shadow-xl backdrop-blur-xl sm:grid-cols-2 lg:grid-cols-3">
-      {VIDEOS.map((video) => (
+      {visibleVideos.map((video) => (
         <ThumbnailCard key={video.id} video={video} onPlay={setPlaying} />
       ))}
+      {visibleVideos.length === 0 && (
+        <div className="sm:col-span-2 lg:col-span-3 rounded-2xl border border-dashed border-white/15 bg-zinc-900/30 p-5 text-center text-sm text-zinc-400">
+          No videos found for “{searchQuery.trim()}”.
+        </div>
+      )}
     </section>
   );
 }
