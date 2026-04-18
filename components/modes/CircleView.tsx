@@ -224,6 +224,7 @@ export function CircleView() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-white">{friend.name}</p>
+                  <p className="truncate text-[11px] text-zinc-500">{friend.handle}</p>
                   <p className="text-xs text-zinc-500">{friend.mutualFriends} mutual friends</p>
                 </div>
                 <button
