@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Sociali",
-  description: "Single-tab social media super app prototype",
+  description: "All-in-one social media platform with real backend APIs and persistent data",
 };
 
 export default function RootLayout({
