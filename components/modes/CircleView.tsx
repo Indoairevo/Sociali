@@ -101,7 +101,17 @@ export function CircleView() {
   }
 
   function toggleLike(id: number) {
-    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, liked: !p.liked } : p));
+    setPosts((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        const nextLiked = !p.liked;
+        return {
+          ...p,
+          liked: nextLiked,
+          likes: Math.max(0, p.likes + (nextLiked ? 1 : -1)),
+        };
+      })
+    );
   }
 
   const connectedCount = friends.filter((f) => f.connected).length;
