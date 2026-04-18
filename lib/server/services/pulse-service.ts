@@ -110,12 +110,20 @@ export async function togglePulseReaction(input: {
       throw new Error("POST_NOT_FOUND");
     }
 
-    const target =
-      input.field === "liked"
-        ? post.likes
-        : input.field === "reposted"
-          ? post.reposts
-          : post.bookmarks;
+    let target: string[];
+    switch (input.field) {
+      case "liked":
+        target = post.likes;
+        break;
+      case "reposted":
+        target = post.reposts;
+        break;
+      case "bookmarked":
+        target = post.bookmarks;
+        break;
+      default:
+        throw new Error("INVALID_REACTION_FIELD");
+    }
 
     const idx = target.indexOf(input.user.id);
     if (idx >= 0) {

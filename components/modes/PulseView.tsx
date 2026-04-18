@@ -184,11 +184,11 @@ export function PulseView() {
         if (p.id !== id) return p;
         if (field === "liked") {
           const nextLiked = !p.liked;
-          return { ...p, liked: nextLiked, likes: p.likes + (nextLiked ? 1 : -1) };
+          return { ...p, liked: nextLiked, likes: Math.max(0, p.likes + (nextLiked ? 1 : -1)) };
         }
         if (field === "reposted") {
           const nextReposted = !p.reposted;
-          return { ...p, reposted: nextReposted, reposts: p.reposts + (nextReposted ? 1 : -1) };
+          return { ...p, reposted: nextReposted, reposts: Math.max(0, p.reposts + (nextReposted ? 1 : -1)) };
         }
         return { ...p, bookmarked: !p.bookmarked };
       })
