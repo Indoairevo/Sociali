@@ -31,9 +31,11 @@ function decorate(
     username: "unknown",
   };
 
-  const gradientIndex = Math.abs(
-    [...post.userId].reduce((sum, c) => sum + c.charCodeAt(0), 0)
-  ) % gradients.length;
+  let gradientHash = 0;
+  for (const char of post.userId) {
+    gradientHash += char.charCodeAt(0);
+  }
+  const gradientIndex = Math.abs(gradientHash) % gradients.length;
 
   return {
     id: post.id,

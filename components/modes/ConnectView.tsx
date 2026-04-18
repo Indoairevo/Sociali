@@ -111,9 +111,8 @@ export function ConnectView() {
   const activeChat = chats.find((c) => c.id === activeChatId)!;
   const chatMessages = messages[activeChatId] ?? [];
 
-  const filteredChats = chats.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const normalizedQuery = searchQuery.toLowerCase();
+  const filteredChats = chats.filter((c) => c.name.toLowerCase().includes(normalizedQuery));
 
   /* Scroll to bottom when messages change */
   useEffect(() => {

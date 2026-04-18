@@ -182,8 +182,14 @@ export function PulseView() {
     setPosts((current) =>
       current.map((p) => {
         if (p.id !== id) return p;
-        if (field === "liked") return { ...p, liked: !p.liked, likes: p.likes + (p.liked ? -1 : 1) };
-        if (field === "reposted") return { ...p, reposted: !p.reposted, reposts: p.reposts + (p.reposted ? -1 : 1) };
+        if (field === "liked") {
+          const nextLiked = !p.liked;
+          return { ...p, liked: nextLiked, likes: p.likes + (nextLiked ? 1 : -1) };
+        }
+        if (field === "reposted") {
+          const nextReposted = !p.reposted;
+          return { ...p, reposted: nextReposted, reposts: p.reposts + (nextReposted ? 1 : -1) };
+        }
         return { ...p, bookmarked: !p.bookmarked };
       })
     );
