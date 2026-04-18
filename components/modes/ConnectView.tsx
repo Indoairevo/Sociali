@@ -147,7 +147,7 @@ export function ConnectView() {
         id: Date.now(),
         mine: false,
         text: replies[Math.floor(Math.random() * replies.length)],
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
         read: true,
       };
       setMessages((prev) => ({
@@ -164,7 +164,7 @@ export function ConnectView() {
       id: Date.now(),
       mine: true,
       text,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
       read: false,
     };
     setMessages((prev) => ({

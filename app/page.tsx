@@ -162,7 +162,7 @@ export default function Home() {
                 {active && (
                   <motion.span
                     layoutId="nav-indicator"
-                    className="absolute inset-0 rounded-xl"
+                    className="absolute inset-0 rounded-xl bg-white/10 ring-1 ring-inset ring-white/15"
                     transition={{ type: "spring", stiffness: 400, damping: 35 }}
                   />
                 )}
