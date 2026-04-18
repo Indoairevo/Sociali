@@ -4,9 +4,19 @@ interface RateLimitBucket {
 }
 
 const buckets = new Map<string, RateLimitBucket>();
+let lastCleanupAt = 0;
 
 export function allowWriteByWindow(key: string, maxRequests: number, windowMs: number): boolean {
   const now = Date.now();
+  if (now - lastCleanupAt >= windowMs || buckets.size > 2000) {
+    for (const [bucketKey, bucket] of buckets) {
+      if (now - bucket.windowStart >= windowMs) {
+        buckets.delete(bucketKey);
+      }
+    }
+    lastCleanupAt = now;
+  }
+
   const existing = buckets.get(key);
 
   if (!existing || now - existing.windowStart >= windowMs) {
@@ -19,6 +29,5 @@ export function allowWriteByWindow(key: string, maxRequests: number, windowMs: n
   }
 
   existing.count += 1;
-  buckets.set(key, existing);
   return true;
 }

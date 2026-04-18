@@ -152,28 +152,35 @@ export async function listPulsePosts(): Promise<PulsePost[]> {
 }
 
 export async function createPulsePost(text: string): Promise<PulsePost> {
-  const newPost: PulsePost = {
-    id: Date.now(),
-    user: "Indra Evo",
-    handle: "@indoairevo",
-    avatar: "IE",
-    avatarGradient: "from-sky-400 to-indigo-600",
-    text,
-    createdAt: new Date().toISOString(),
-    likes: 0,
-    reposts: 0,
-    replies: 0,
-    liked: false,
-    reposted: false,
-    bookmarked: false,
-  };
+  let createdPost: PulsePost | null = null;
 
   writeQueue = writeQueue.then(async () => {
     const posts = await readPostsFromFile();
-    const nextPosts = [newPost, ...posts].slice(0, maxStoredPosts);
+    const nextId = posts.reduce((maxId, post) => Math.max(maxId, post.id), 0) + 1;
+    createdPost = {
+      id: nextId,
+      user: "Indra Evo",
+      handle: "@indoairevo",
+      avatar: "IE",
+      avatarGradient: "from-sky-400 to-indigo-600",
+      text,
+      createdAt: new Date().toISOString(),
+      likes: 0,
+      reposts: 0,
+      replies: 0,
+      liked: false,
+      reposted: false,
+      bookmarked: false,
+    };
+
+    const nextPosts = [createdPost, ...posts].slice(0, maxStoredPosts);
     await writePostsToFile(nextPosts);
   });
   await writeQueue;
 
-  return newPost;
+  if (!createdPost) {
+    throw new Error("Failed to create post.");
+  }
+
+  return createdPost;
 }
