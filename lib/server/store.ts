@@ -64,6 +64,7 @@ export async function readDb(): Promise<DatabaseShape> {
   return readDbUnsafe();
 }
 
+// mutator can either mutate the provided draft in place (return void) or return a full replacement object.
 export async function updateDb(mutator: (db: DatabaseShape) => void | DatabaseShape): Promise<DatabaseShape> {
   let nextDb: DatabaseShape | null = null;
 

@@ -2,6 +2,7 @@
 
 import { Bookmark, Heart, Loader2, LogIn, MessageCircle, MoreHorizontal, Repeat2, Share2, UserPlus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { initialsFromName } from "@/lib/shared/identity";
 
 interface Post {
   id: string;
@@ -309,7 +310,7 @@ export function PulseView() {
 
           <div className="flex gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 text-xs font-semibold text-white">
-              {user ? user.displayName.split(" ").filter(Boolean).slice(0, 2).map((n) => n[0]).join("").toUpperCase() : "IE"}
+              {user ? initialsFromName(user.displayName) : "IE"}
             </div>
             <div className="flex flex-1 flex-col gap-3">
               <textarea

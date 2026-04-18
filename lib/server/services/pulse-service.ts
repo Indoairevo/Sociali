@@ -1,5 +1,6 @@
-import { updateDb } from "@/lib/server/store";
+import { readDb, updateDb } from "@/lib/server/store";
 import type { PulsePostRecord, PulsePostView, SessionUser } from "@/lib/server/types";
+import { initialsFromName } from "@/lib/shared/identity";
 
 type ReactionField = "liked" | "reposted" | "bookmarked";
 
@@ -11,15 +12,6 @@ const gradients = [
   "from-emerald-400 to-teal-600",
   "from-fuchsia-400 to-pink-600",
 ];
-
-function initials(displayName: string): string {
-  return displayName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("") || "U";
-}
 
 function relativeTime(iso: string): string {
   const deltaMs = Date.now() - new Date(iso).getTime();
@@ -47,7 +39,7 @@ function decorate(
     id: post.id,
     user: author.displayName,
     handle: `@${author.username}`,
-    avatar: initials(author.displayName),
+    avatar: initialsFromName(author.displayName),
     avatarGradient: gradients[gradientIndex],
     text: post.text,
     time: relativeTime(post.createdAt),
@@ -65,9 +57,7 @@ export async function listPulsePosts(input: {
   cursor?: string;
   limit: number;
 }): Promise<{ items: PulsePostView[]; nextCursor: string | null }> {
-  const db = await updateDb((draft) => {
-    draft.sessions = draft.sessions.filter((s) => new Date(s.expiresAt).getTime() > Date.now());
-  });
+  const db = await readDb();
 
   const sorted = [...db.pulsePosts].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

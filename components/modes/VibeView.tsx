@@ -68,7 +68,20 @@ export function VibeView() {
   const [reels, setReels] = useState<Reel[]>(SEED_REELS);
 
   function toggle(id: number, field: "liked" | "saved" | "followed") {
-    setReels((prev) => prev.map((r) => r.id === id ? { ...r, [field]: !r[field] } : r));
+    setReels((prev) =>
+      prev.map((r) => {
+        if (r.id !== id) return r;
+        if (field === "liked") {
+          const nextLiked = !r.liked;
+          return {
+            ...r,
+            liked: nextLiked,
+            likes: nextLiked ? r.likes + 1 : Math.max(0, r.likes - 1),
+          };
+        }
+        return { ...r, [field]: !r[field] };
+      })
+    );
   }
 
   return (
@@ -101,7 +114,7 @@ export function VibeView() {
                 <Heart size={20} fill={reel.liked ? "white" : "none"} className="text-white" />
               </div>
               <span className="text-[11px] font-medium text-white drop-shadow">
-                {formatCount(reel.likes + (reel.liked ? 1 : 0))}
+                {formatCount(reel.likes)}
               </span>
             </button>
 

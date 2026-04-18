@@ -70,9 +70,11 @@ export async function loginUser(input: {
   };
 
   await updateDb((draft) => {
-    draft.sessions = draft.sessions.filter(
-      (s) => s.userId !== user.id || new Date(s.expiresAt).getTime() > Date.now()
-    );
+    draft.sessions = draft.sessions.filter((s) => {
+      const isExpiredSessionForUser =
+        s.userId === user.id && new Date(s.expiresAt).getTime() <= Date.now();
+      return !isExpiredSessionForUser;
+    });
     draft.sessions.push(session);
   });
 

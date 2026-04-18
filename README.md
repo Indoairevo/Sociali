@@ -32,7 +32,7 @@ Open `http://localhost:3000`.
 
 Data is stored in:
 
-- `/home/runner/work/Sociali/Sociali/data/sociali-db.json`
+- `./data/sociali-db.json`
 
 A default local development account is auto-seeded:
 
