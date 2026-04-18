@@ -64,16 +64,33 @@ function formatCount(n: number): string {
   return String(n);
 }
 
-export function VibeView() {
+export function VibeView({ searchQuery = "" }: { searchQuery?: string }) {
   const [reels, setReels] = useState<Reel[]>(SEED_REELS);
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
   function toggle(id: number, field: "liked" | "saved" | "followed") {
-    setReels((prev) => prev.map((r) => r.id === id ? { ...r, [field]: !r[field] } : r));
+    setReels((prev) =>
+      prev.map((r) => {
+        if (r.id !== id) return r;
+        if (field === "liked") {
+          const liked = !r.liked;
+          return { ...r, liked, likes: Math.max(0, r.likes + (liked ? 1 : -1)) };
+        }
+        if (field === "saved") return { ...r, saved: !r.saved };
+        return { ...r, followed: !r.followed };
+      })
+    );
   }
+
+  const filteredReels = normalizedQuery
+    ? reels.filter((reel) =>
+        `${reel.user} ${reel.handle} ${reel.caption} ${reel.music}`.toLowerCase().includes(normalizedQuery)
+      )
+    : reels;
 
   return (
     <section className="snap-reel h-full overflow-y-auto rounded-3xl border border-white/10 shadow-xl">
-      {reels.map((reel) => (
+      {filteredReels.map((reel) => (
         <article
           key={reel.id}
           className={`snap-reel-item relative flex h-[calc(100vh-180px)] min-h-[500px] overflow-hidden bg-gradient-to-b ${reel.gradient}`}
@@ -101,7 +118,7 @@ export function VibeView() {
                 <Heart size={20} fill={reel.liked ? "white" : "none"} className="text-white" />
               </div>
               <span className="text-[11px] font-medium text-white drop-shadow">
-                {formatCount(reel.likes + (reel.liked ? 1 : 0))}
+                {formatCount(reel.likes)}
               </span>
             </button>
 
@@ -166,6 +183,11 @@ export function VibeView() {
           </div>
         </article>
       ))}
+      {filteredReels.length === 0 && (
+        <div className="flex h-full min-h-[300px] items-center justify-center px-4 text-center text-sm text-zinc-400">
+          No reels found for “{searchQuery.trim()}”.
+        </div>
+      )}
     </section>
   );
 }

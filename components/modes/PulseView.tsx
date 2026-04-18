@@ -109,14 +109,14 @@ function PostCard({ post, onToggle }: { post: Post; onToggle: (id: number, field
               className={`flex items-center gap-1.5 text-xs transition ${post.liked ? "text-rose-400" : "text-zinc-500 hover:text-rose-400"}`}
             >
               <Heart size={15} fill={post.liked ? "currentColor" : "none"} />
-              <span>{post.likes + (post.liked ? 1 : 0)}</span>
+              <span>{post.likes}</span>
             </button>
             <button
               onClick={() => onToggle(post.id, "reposted")}
               className={`flex items-center gap-1.5 text-xs transition ${post.reposted ? "text-emerald-400" : "text-zinc-500 hover:text-emerald-400"}`}
             >
               <Repeat2 size={15} />
-              <span>{post.reposts + (post.reposted ? 1 : 0)}</span>
+              <span>{post.reposts}</span>
             </button>
             <button className="flex items-center gap-1.5 text-xs text-zinc-500 transition hover:text-sky-400">
               <MessageCircle size={15} />
@@ -138,12 +138,26 @@ function PostCard({ post, onToggle }: { post: Post; onToggle: (id: number, field
   );
 }
 
-export function PulseView() {
+export function PulseView({ searchQuery = "" }: { searchQuery?: string }) {
   const [posts, setPosts] = useState<Post[]>(SEED_POSTS);
   const [draft, setDraft] = useState("");
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
   function toggle(id: number, field: "liked" | "reposted" | "bookmarked") {
-    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, [field]: !p[field] } : p));
+    setPosts((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        if (field === "liked") {
+          const liked = !p.liked;
+          return { ...p, liked, likes: Math.max(0, p.likes + (liked ? 1 : -1)) };
+        }
+        if (field === "reposted") {
+          const reposted = !p.reposted;
+          return { ...p, reposted, reposts: Math.max(0, p.reposts + (reposted ? 1 : -1)) };
+        }
+        return { ...p, bookmarked: !p.bookmarked };
+      })
+    );
   }
 
   function submitPost() {
@@ -161,6 +175,12 @@ export function PulseView() {
     setPosts((prev) => [newPost, ...prev]);
     setDraft("");
   }
+
+  const filteredPosts = normalizedQuery
+    ? posts.filter((post) =>
+        `${post.user} ${post.handle} ${post.text}`.toLowerCase().includes(normalizedQuery)
+      )
+    : posts;
 
   return (
     <div className="flex h-full gap-4 overflow-hidden">
@@ -197,9 +217,14 @@ export function PulseView() {
         </div>
 
         {/* Posts */}
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <PostCard key={post.id} post={post} onToggle={toggle} />
         ))}
+        {filteredPosts.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-white/15 bg-zinc-900/30 p-5 text-center text-sm text-zinc-400">
+            No pulses found for “{searchQuery.trim()}”.
+          </div>
+        )}
       </section>
 
       {/* ── Trending sidebar ── */}

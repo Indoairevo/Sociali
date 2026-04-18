@@ -97,13 +97,13 @@ function Avatar({ chat, size = "md" }: { chat: Chat; size?: "sm" | "md" | "lg" }
 }
 
 /* ── Main component ── */
-export function ConnectView() {
+export function ConnectView({ searchQuery = "" }: { searchQuery?: string }) {
   const [activeChatId, setActiveChatId] = useState<number>(1);
   const [messages, setMessages] = useState<Record<number, Message[]>>(SEED_MESSAGES);
   const [draft, setDraft] = useState("");
   const [typing, setTyping] = useState(false);
   const [chats, setChats] = useState<Chat[]>(CHATS);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [sidebarQuery, setSidebarQuery] = useState("");
   const msgEndRef = useRef<HTMLDivElement>(null);
   const inputRef   = useRef<HTMLInputElement>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -111,8 +111,11 @@ export function ConnectView() {
   const activeChat = chats.find((c) => c.id === activeChatId)!;
   const chatMessages = messages[activeChatId] ?? [];
 
+  const combinedQuery = `${sidebarQuery} ${searchQuery}`.trim().toLowerCase();
   const filteredChats = chats.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    combinedQuery
+      ? `${c.name} ${c.lastMessage}`.toLowerCase().includes(combinedQuery)
+      : true
   );
 
   /* Scroll to bottom when messages change */
@@ -126,6 +129,12 @@ export function ConnectView() {
       prev.map((c) => (c.id === activeChatId ? { ...c, unread: 0 } : c))
     );
   }, [activeChatId]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimer.current) clearTimeout(typingTimer.current);
+    };
+  }, []);
 
   /* Simulate typing indicator from partner */
   function simulateTyping() {
@@ -192,8 +201,8 @@ export function ConnectView() {
             <input
               className="flex-1 bg-transparent text-xs text-white placeholder:text-zinc-500 focus:outline-none"
               placeholder="Search conversations…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={sidebarQuery}
+              onChange={(e) => setSidebarQuery(e.target.value)}
             />
           </div>
         </div>
